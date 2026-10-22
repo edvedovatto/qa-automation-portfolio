@@ -1,0 +1,21 @@
+# Node
+node_modules/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Java / Maven
+target/
+
+# Env and logs
+.env
+*.log
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

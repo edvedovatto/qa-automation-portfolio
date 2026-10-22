@@ -1,0 +1,14 @@
+{
+  "name": "e2e-playwright",
+  "version": "1.0.0",
+  "private": true,
+  "description": "UI end-to-end tests for OWASP Juice Shop",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}
