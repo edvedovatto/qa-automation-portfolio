@@ -1,0 +1,59 @@
+name: regression
+
+on:
+  schedule:
+    - cron: '0 6 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: start juice shop
+        run: |
+          docker run -d -p 3000:3000 bkimminich/juice-shop:v20.3.0
+          timeout 120 bash -c 'until curl -sf http://localhost:3000 > /dev/null; do sleep 2; done'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: e2e-playwright/package-lock.json
+      - run: npm ci
+        working-directory: e2e-playwright
+      - run: npx playwright install --with-deps chromium
+        working-directory: e2e-playwright
+      - run: npx playwright test
+        working-directory: e2e-playwright
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regression-ui-report
+          path: |
+            e2e-playwright/playwright-report
+            e2e-playwright/test-results
+          retention-days: 14
+
+  api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: start juice shop
+        run: |
+          docker run -d -p 3000:3000 bkimminich/juice-shop:v20.3.0
+          timeout 120 bash -c 'until curl -sf http://localhost:3000 > /dev/null; do sleep 2; done'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven
+      - run: mvn -B test
+        working-directory: api-restassured
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: regression-api-report
+          path: api-restassured/target/surefire-reports
+          retention-days: 14

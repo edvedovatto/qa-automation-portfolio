@@ -15,6 +15,9 @@ const dismissedBanners = ['welcomebanner_status', 'cookieconsent_status'].map((n
 
 export default defineConfig({
   testDir: './tests',
+  retries: process.env.CI ? 1 : 0,
+  workers: process.env.CI ? 1 : undefined,
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL,
     storageState: { cookies: dismissedBanners, origins: [] },
