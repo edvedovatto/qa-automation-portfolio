@@ -1,5 +1,6 @@
 package api;
 
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
@@ -14,6 +15,7 @@ class LoginTest extends BaseTest {
 
         shop.login(user).then()
                 .statusCode(200)
+                .body(matchesJsonSchemaInClasspath("schemas/login-response.json"))
                 .body("authentication.token", not(emptyString()))
                 .body("authentication.umail", equalTo(user.email()));
     }
@@ -26,5 +28,17 @@ class LoginTest extends BaseTest {
         shop.whoAmI(login.authentication().token()).then()
                 .statusCode(200)
                 .body("user.email", equalTo(user.email()));
+    }
+
+    @Test
+    void wrongPasswordReturns401() {
+        Credentials user = newUser();
+
+        shop.login(new Credentials(user.email(), "wrongpassword")).then().statusCode(401);
+    }
+
+    @Test
+    void unknownEmailReturns401() {
+        shop.login(new Credentials("wrong@gmail.com", "wrongpassword")).then().statusCode(401);
     }
 }

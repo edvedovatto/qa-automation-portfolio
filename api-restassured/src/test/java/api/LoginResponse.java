@@ -6,6 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 record LoginResponse(Authentication authentication) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    record Authentication(String token, String umail) {
+    record Authentication(String token, int bid, String umail) {
     }
 }

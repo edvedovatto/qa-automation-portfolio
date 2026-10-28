@@ -17,9 +17,17 @@ abstract class BaseTest {
 
     protected final ShopClient shop = new ShopClient(spec);
 
+    protected Credentials randomCredentials() {
+        return new Credentials("user" + System.nanoTime() + "@gmail.com", "Password123");
+    }
+
     protected Credentials newUser() {
-        Credentials user = new Credentials("user" + System.nanoTime() + "@gmail.com", "Password123");
+        Credentials user = randomCredentials();
         shop.createUser(user).then().statusCode(201);
         return user;
+    }
+
+    protected LoginResponse.Authentication loggedInUser() {
+        return shop.login(newUser()).as(LoginResponse.class).authentication();
     }
 }
