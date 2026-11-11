@@ -1,4 +1,4 @@
-import { Locator, Page, expect } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 export class LoginPage {
   readonly emailInput: Locator;
@@ -7,9 +7,9 @@ export class LoginPage {
   readonly error: Locator;
 
   constructor(private readonly page: Page) {
-    this.emailInput = page.locator('#email');
-    this.passwordInput = page.locator('#password');
-    this.loginButton = page.locator('#loginButton');
+    this.emailInput = page.getByLabel('Text field for the login email');
+    this.passwordInput = page.getByLabel('Text field for the login password');
+    this.loginButton = page.getByRole('button', { name: 'Login', exact: true });
     this.error = page.getByRole('alert');
   }
 
@@ -21,25 +21,5 @@ export class LoginPage {
     await this.emailInput.fill(email);
     await this.passwordInput.fill(password);
     await this.loginButton.click();
-  }
-
-  async logout() {
-    await this.page.locator('#navbarAccount').click();
-    await this.page.locator('#navbarLogoutButton').click();
-  }
-
-  async token() {
-    return this.page.evaluate(() => localStorage.getItem('token'));
-  }
-
-  async expectLoggedInAs(email: string) {
-    await this.page.locator('#navbarAccount').click();
-    await expect(this.page.getByRole('menuitem', { name: 'Go to user profile' })).toContainText(email);
-  }
-
-  async expectLoggedOut() {
-    await this.page.locator('#navbarAccount').click();
-    await expect(this.page.locator('#navbarLoginButton')).toBeVisible();
-    expect(await this.token()).toBeNull();
   }
 }

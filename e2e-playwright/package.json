@@ -3,12 +3,21 @@
   "version": "1.0.0",
   "private": true,
   "description": "UI end-to-end tests for OWASP Juice Shop",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "test": "playwright test"
+    "test": "bddgen && playwright test",
+    "test:smoke": "bddgen && playwright test --grep @smoke",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
   },
   "devDependencies": {
+    "@biomejs/biome": "2.6.6",
     "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.5",
+    "playwright-bdd": "9.2.1",
     "typescript": "^7.0.2"
   }
 }

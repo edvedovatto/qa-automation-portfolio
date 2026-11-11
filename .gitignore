@@ -6,16 +6,19 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+.features-gen/
 
 # Java / Maven
 target/
 
 # Env and logs
 .env
+.env.*
 *.log
 
 # Editor / OS
 .idea/
 .vscode/
+*.iml
 .DS_Store
 Thumbs.db

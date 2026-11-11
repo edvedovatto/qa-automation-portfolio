@@ -1,8 +1,9 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "required": ["status", "data"],
   "properties": {
-    "status": { "type": "string" },
+    "status": { "enum": ["success"] },
     "data": {
       "type": "array",
       "minItems": 1,

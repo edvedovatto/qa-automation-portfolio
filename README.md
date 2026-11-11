@@ -1,0 +1,83 @@
+# qa-automation-portfolio
+
+[![smoke](https://github.com/edvedovatto/qa-automation-portfolio/actions/workflows/smoke.yml/badge.svg)](https://github.com/edvedovatto/qa-automation-portfolio/actions/workflows/smoke.yml)
+[![regression](https://github.com/edvedovatto/qa-automation-portfolio/actions/workflows/regression.yml/badge.svg)](https://github.com/edvedovatto/qa-automation-portfolio/actions/workflows/regression.yml)
+
+Automated tests for [OWASP Juice Shop](https://github.com/juice-shop/juice-shop) v20.3.0, an online shop built for security training. I test the same shop two ways: through the UI with Playwright and TypeScript, with the scenarios written in Gherkin, and through the API with REST Assured and Java 17.
+
+What I wanted to show here: how I split what belongs in the UI and what belongs in the API, test data created through the API, contracts checked against JSON schemas, error cases, smoke kept separate from regression, and how I deal with flaky tests.
+
+## Running it
+
+You need Node 22+ (the pipeline uses 24), Java 17 and Maven. The app can run in Docker:
+
+```
+docker run -d -p 3000:3000 bkimminich/juice-shop:v20.3.0
+```
+
+UI (full suite, then smoke only):
+
+```
+cd e2e-playwright
+npm ci
+npx playwright install chromium
+npm test
+npm run test:smoke
+```
+
+API (full suite, then smoke only):
+
+```
+cd api-restassured
+mvn test
+mvn test -Dgroups=smoke
+```
+
+If the app runs somewhere else, set `BASE_URL=http://host:port` (Maven also takes `-DbaseUrl=...`). Lint and formatting: `npm run lint`, `npm run typecheck` and `mvn spotless:check`.
+
+The order tests use up real stock. The app goes back to its initial state when it restarts, so if you run the suite many times in a row, restart the app now and then. The pipeline doesn't have this problem because every run starts a fresh container.
+
+## Strategy
+
+There are 21 UI tests and 35 API tests, plus 13 API tests for bugs I found in the app, which stay disabled (more on that below). The UI covers what only the UI can show: error messages, disabled buttons, redirects and the purchase flow end to end. Business rules, permissions and contracts live in the API tests, which are faster and break less.
+
+**UI:** login (success, wrong password, unknown email, session after reload, logout, return to the page that asked for login), registration (success, email already in use, invalid email, short password, passwords that don't match), search, basket (including a visitor) and checkout (full order, and being blocked without an address or a card).
+
+The UI scenarios are in `e2e-playwright/features`, written in Gherkin, and the steps are in `e2e-playwright/steps`. I use [playwright-bdd](https://github.com/vitalets/playwright-bdd), which turns each scenario into a Playwright test, so fixtures, traces and the Playwright report still work. Steps are short and do the work through page objects. Steps like "Given I am a logged in customer" or "Given I have an account" set up the data through the API.
+
+I didn't use Gherkin for the API. REST Assured already reads as `given / when / then`, and the method name says what the scenario is (`wrongPasswordReturns401`, `addressOfAnotherUserCannotBeDeleted`).
+
+**API:** login, products, registration, basket, addresses, cards, checkout and order history. The main responses are validated against JSON schemas. Error cases cover:
+- 401 without login and with an invalid token;
+- 400 for a duplicate email, an invalid card and more than 5 units of a product;
+- 404 for a product that doesn't exist;
+- one user trying to read or delete another user's data.
+
+**Test data:** every test creates its own user through the API, with a unique email. The checkout address and card are created through the API too. The UI only does the part being tested.
+
+**Smoke and regression:** smoke is 7 tagged tests (`@smoke` in the UI, `@Tag("smoke")` in the API): login, search, basket, product list and one order. Regression is the whole suite.
+
+**Left out:** browsers other than Chromium, checkout variations (coupons, wallet, other delivery options), load testing and in-depth security testing. At this suite size they weren't worth it.
+
+## Bugs I found
+
+Juice Shop has bugs on purpose. The ones I found are in `KnownIssuesTest`. Each test is written with the correct behavior and is turned off with `@Disabled` and the reason, which is why Maven shows 13 skipped. If the app gets fixed, just turn them back on. The main ones:
+
+- a user can read another user's basket, change an item in it and check it out;
+- registration accepts an invalid email, no password, and passwords that don't match;
+- the basket accepts negative and zero quantities, and checkout accepts an empty basket;
+- an address is saved with only a name;
+- broken JSON on login, an unknown product in the basket and order history without login all return 500.
+
+## Pipeline
+
+- `smoke.yml`, on every push and pull request: lint (Biome, `tsc`, Spotless) and the UI and API smoke tests, with the app started from the Docker image.
+- `regression.yml`, Monday to Friday at night and whenever I trigger it by hand: the whole suite.
+
+Flaky tests: in the pipeline, a failing UI test gets one retry, only one. The failure trace is kept, and the UI and API reports are uploaded as artifacts even when the run fails. On the API side, the request and response are only logged when a check fails.
+
+## What I'd do next
+
+- Publish the Playwright report to GitHub Pages.
+- Add schemas for the error responses, not only the successful ones.
+- Run Firefox and WebKit in the regression.

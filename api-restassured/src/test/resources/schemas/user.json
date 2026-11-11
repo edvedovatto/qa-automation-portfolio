@@ -1,15 +1,17 @@
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "required": ["status", "data"],
   "properties": {
-    "status": { "type": "string" },
+    "status": { "enum": ["success"] },
     "data": {
       "type": "object",
       "required": ["id", "email", "role"],
+      "not": { "required": ["password"] },
       "properties": {
         "id": { "type": "integer" },
         "email": { "type": "string" },
-        "role": { "type": "string" }
+        "role": { "enum": ["customer"] }
       }
     }
   }

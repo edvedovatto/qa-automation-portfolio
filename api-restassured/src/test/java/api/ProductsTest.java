@@ -6,24 +6,28 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 class ProductsTest extends BaseTest {
 
     @Test
+    @Tag("smoke")
     void listsProducts() {
-        shop.products().then()
+        shop.products()
+                .then()
                 .statusCode(200)
                 .body(matchesJsonSchemaInClasspath("schemas/product-list.json"))
-                .body("data.name", hasItem("Apple Juice (1000ml)"));
+                .body("data.name", hasItem(APPLE_JUICE));
     }
 
     @Test
     void returnsOneProductById() {
-        shop.product(1).then()
+        shop.product(APPLE_JUICE_ID)
+                .then()
                 .statusCode(200)
                 .body(matchesJsonSchemaInClasspath("schemas/product.json"))
-                .body("data.name", equalTo("Apple Juice (1000ml)"));
+                .body("data.name", equalTo(APPLE_JUICE));
     }
 
     @Test
@@ -33,16 +37,15 @@ class ProductsTest extends BaseTest {
 
     @Test
     void searchReturnsOnlyMatchingProducts() {
-        shop.search("apple").then()
+        shop.search("apple")
+                .then()
                 .statusCode(200)
-                .body("data.name", hasItem("Apple Juice (1000ml)"))
-                .body("data.name", not(hasItem("Banana Juice (1000ml)")));
+                .body("data.name", hasItem(APPLE_JUICE))
+                .body("data.name", not(hasItem(BANANA_JUICE)));
     }
 
     @Test
     void searchWithNoMatchReturnsEmptyList() {
-        shop.search("zzzz").then()
-                .statusCode(200)
-                .body("data", empty());
+        shop.search("zzzz").then().statusCode(200).body("data", empty());
     }
 }

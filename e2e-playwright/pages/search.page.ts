@@ -1,16 +1,14 @@
-import { Locator, Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 export class SearchPage {
   readonly openSearchButton: Locator;
   readonly searchInput: Locator;
   readonly noResults: Locator;
-  readonly basketCount: Locator;
 
   constructor(private readonly page: Page) {
     this.openSearchButton = page.getByRole('button', { name: 'Open search' });
     this.searchInput = page.locator('#searchQuery input');
     this.noResults = page.getByText('No results found');
-    this.basketCount = page.getByRole('button', { name: 'Show the shopping cart' }).locator('.warn-notification');
   }
 
   async goto() {
@@ -28,6 +26,13 @@ export class SearchPage {
   }
 
   async addToBasket(name: string) {
+    const saved = this.page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/BasketItems') &&
+        ['POST', 'PUT'].includes(response.request().method()) &&
+        response.ok(),
+    );
     await this.product(name).getByRole('button', { name: 'Add to Basket' }).click();
+    await saved;
   }
 }

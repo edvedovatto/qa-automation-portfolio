@@ -11,7 +11,8 @@ class UsersTest extends BaseTest {
     void createsAUser() {
         Credentials user = randomCredentials();
 
-        shop.createUser(user).then()
+        shop.createUser(user)
+                .then()
                 .statusCode(201)
                 .body(matchesJsonSchemaInClasspath("schemas/user.json"))
                 .body("data.email", equalTo(user.email()));
@@ -21,6 +22,9 @@ class UsersTest extends BaseTest {
     void duplicateEmailReturns400() {
         Credentials user = newUser();
 
-        shop.createUser(user).then().statusCode(400);
+        shop.createUser(user)
+                .then()
+                .statusCode(400)
+                .body("errors[0].message", equalTo("email must be unique"));
     }
 }

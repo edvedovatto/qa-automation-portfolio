@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "required": ["status", "data"],
+  "properties": {
+    "status": { "enum": ["success"] },
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "UserId", "fullName", "mobileNum", "zipCode", "streetAddress", "city", "state", "country"],
+        "properties": {
+          "id": { "type": "integer" },
+          "UserId": { "type": "integer" },
+          "fullName": { "type": "string" },
+          "mobileNum": { "type": "integer" },
+          "zipCode": { "type": "string" },
+          "streetAddress": { "type": "string" },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "country": { "type": "string" }
+        }
+      }
+    }
+  }
+}
