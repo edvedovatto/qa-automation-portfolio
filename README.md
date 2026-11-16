@@ -39,9 +39,11 @@ The order tests use up real stock. The app goes back to its initial state when i
 
 ## Strategy
 
-There are 21 UI tests and 35 API tests, plus 13 API tests for bugs I found in the app, which stay disabled (more on that below). The UI covers what only the UI can show: error messages, disabled buttons, redirects and the purchase flow end to end. Business rules, permissions and contracts live in the API tests, which are faster and break less.
+There are 25 UI tests and 35 API tests, plus 13 API tests for bugs I found in the app, which stay disabled (more on that below). The UI covers what only the UI can show: error messages, disabled buttons, redirects and the purchase flow end to end. Business rules, permissions and contracts live in the API tests, which are faster and break less.
 
 **UI:** login (success, wrong password, unknown email, session after reload, logout, return to the page that asked for login), registration (success, email already in use, invalid email, short password, passwords that don't match), search, basket (including a visitor) and checkout (full order, and being blocked without an address or a card).
+
+**Accessibility:** the shop, login, registration and basket pages are scanned with [axe](https://github.com/dequelabs/axe-core-npm/tree/develop/packages/playwright) against WCAG 2.1 AA. The problems the app already has (listed below) are skipped by rule, so the scenario fails when a new kind of problem shows up. When it fails, the full axe result is attached to the report.
 
 The UI scenarios are in `e2e-playwright/features`, written in Gherkin, and the steps are in `e2e-playwright/steps`. I use [playwright-bdd](https://github.com/vitalets/playwright-bdd), which turns each scenario into a Playwright test, so fixtures, traces and the Playwright report still work. Steps are short and do the work through page objects. Steps like "Given I am a logged in customer" or "Given I have an account" set up the data through the API.
 
@@ -57,7 +59,7 @@ I didn't use Gherkin for the API. REST Assured already reads as `given / when / 
 
 **Smoke and regression:** smoke is 7 tagged tests (`@smoke` in the UI, `@Tag("smoke")` in the API): login, search, basket, product list and one order. Regression is the whole suite.
 
-**Left out:** browsers other than Chromium, checkout variations (coupons, wallet, other delivery options), load testing and in-depth security testing. At this suite size they weren't worth it.
+**Left out:** browsers other than Chromium, visual screenshot comparison (it breaks easily and the images change from one machine to another), checkout variations (coupons, wallet, other delivery options), load testing and in-depth security testing. At this suite size they weren't worth it.
 
 ## Bugs I found
 
@@ -68,6 +70,14 @@ Juice Shop has bugs on purpose. The ones I found are in `KnownIssuesTest`. Each 
 - the basket accepts negative and zero quantities, and checkout accepts an empty basket;
 - an address is saved with only a name;
 - broken JSON on login, an unknown product in the basket and order history without login all return 500.
+
+Accessibility problems found by axe, skipped in `accessibility.steps.ts`:
+
+- the search field in the header has no label (`label`);
+- the quantity and remove buttons in the basket have no name (`button-name`);
+- the logo, basket and language buttons read differently from what they show, so voice control doesn't find them (`label-content-name-mismatch`);
+- the basket table header is missing its cells for screen readers (`aria-required-children`);
+- low contrast on "Only 1 left" and on a small text in the basket header (`color-contrast`).
 
 ## Pipeline
 
@@ -80,4 +90,3 @@ Flaky tests: in the pipeline, a failing UI test gets one retry, only one. The fa
 
 - Publish the Playwright report to GitHub Pages.
 - Add schemas for the error responses, not only the successful ones.
-- Run Firefox and WebKit in the regression.
