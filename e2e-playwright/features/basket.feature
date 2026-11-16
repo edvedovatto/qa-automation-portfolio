@@ -24,10 +24,12 @@ Feature: Basket
       When I open the basket
       And I remove "Apple Juice (1000ml)"
       Then the basket is empty
-
-  Rule: A visitor cannot check out
-
-    Scenario: Visitor has an empty basket and cannot check out
-      When I open the basket
-      Then the basket is empty
       And the checkout button is disabled
+
+  Rule: A visitor has to log in to check out
+
+    Scenario: Checkout sends a visitor to the login page
+      Given I am on the shop
+      When I add "Apple Juice (1000ml)" to the basket as a visitor
+      And I start the checkout
+      Then I am taken to the login page

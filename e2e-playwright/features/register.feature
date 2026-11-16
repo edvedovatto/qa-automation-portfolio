@@ -16,6 +16,7 @@ Feature: Registration
     And I am still on the registration page
 
   Scenario Outline: Registration is blocked
+    Given I have answered the security question
     When I fill in the email "<email>", the password "<password>" and the repeated password "<repeated>"
     Then I see the field error "<error>"
     And the register button is disabled

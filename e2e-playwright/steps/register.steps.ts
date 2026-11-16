@@ -5,6 +5,10 @@ Given('I am on the registration page', async ({ registerPage }) => {
   await registerPage.goto();
 });
 
+Given('I have answered the security question', async ({ registerPage }) => {
+  await registerPage.answerSecurityQuestion();
+});
+
 When('I register with a new email', async ({ registerPage, newEmail }) => {
   await registerPage.register(newEmail, password);
 });

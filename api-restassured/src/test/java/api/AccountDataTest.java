@@ -3,6 +3,7 @@ package api;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 
@@ -66,9 +67,15 @@ class AccountDataTest extends BaseTest {
         LoginResponse.Authentication other = loggedInUser();
         int addressId = addAddress(owner);
 
+        shop.address(owner.token(), addressId)
+                .then()
+                .statusCode(200)
+                .body("data.fullName", equalTo("Joao Silva"));
+
         shop.address(other.token(), addressId)
                 .then()
                 .statusCode(400)
+                .body("data", equalTo("Malicious activity detected."))
                 .body(not(containsString("Joao Silva")));
     }
 
@@ -78,9 +85,12 @@ class AccountDataTest extends BaseTest {
         LoginResponse.Authentication other = loggedInUser();
         int addressId = addAddress(owner);
 
-        shop.deleteAddress(other.token(), addressId).then().statusCode(400);
+        shop.deleteAddress(other.token(), addressId)
+                .then()
+                .statusCode(400)
+                .body("data", equalTo("Malicious activity detected."));
 
-        shop.addresses(owner.token()).then().body("data.id", hasItem(addressId));
+        shop.addresses(owner.token()).then().statusCode(200).body("data.id", hasItem(addressId));
     }
 
     @Test
@@ -94,9 +104,15 @@ class AccountDataTest extends BaseTest {
                         .extract()
                         .path("data.id");
 
+        shop.card(owner.token(), cardId)
+                .then()
+                .statusCode(200)
+                .body("data.fullName", equalTo("Joao Silva"));
+
         shop.card(other.token(), cardId)
                 .then()
                 .statusCode(400)
+                .body("data", equalTo("Malicious activity detected"))
                 .body(not(containsString("Joao Silva")));
     }
 

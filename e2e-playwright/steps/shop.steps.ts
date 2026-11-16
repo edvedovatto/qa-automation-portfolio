@@ -13,6 +13,11 @@ When('I add {string} to the basket', async ({ searchPage }, product: string) => 
   await searchPage.addToBasket(product);
 });
 
+When('I add {string} to the basket as a visitor', async ({ searchPage, header }, product: string) => {
+  await searchPage.product(product).getByRole('button', { name: 'Add to Basket' }).click();
+  await expect(header.basketCount).toHaveText('1');
+});
+
 When('I open the basket', async ({ basketPage }) => {
   await basketPage.goto();
 });

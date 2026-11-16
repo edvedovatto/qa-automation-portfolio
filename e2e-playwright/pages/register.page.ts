@@ -40,11 +40,15 @@ export class RegisterPage {
     await this.emailInput.blur();
   }
 
-  async register(email: string, password: string) {
-    await this.fillCredentials(email, password);
+  async answerSecurityQuestion() {
     await this.securityQuestion.click();
     await this.page.getByRole('option').first().click();
     await this.securityAnswer.fill('Maria');
+  }
+
+  async register(email: string, password: string) {
+    await this.fillCredentials(email, password);
+    await this.answerSecurityQuestion();
     await this.registerButton.click();
   }
 }

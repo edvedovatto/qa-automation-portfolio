@@ -12,8 +12,10 @@ What I wanted to show here: how I split what belongs in the UI and what belongs 
 You need Node 22+ (the pipeline uses 24), Java 17 and Maven. The app can run in Docker:
 
 ```
-docker run -d -p 3000:3000 bkimminich/juice-shop:v20.3.0
+docker run --rm -d -p 3000:3000 bkimminich/juice-shop:v20.3.0
 ```
+
+Without Docker, clone [juice-shop](https://github.com/juice-shop/juice-shop) at v20.3.0, run `npm install` and `npm start` there, and it listens on the same port.
 
 UI (full suite, then smoke only):
 
@@ -39,9 +41,9 @@ The order tests use up real stock. The app goes back to its initial state when i
 
 ## Strategy
 
-There are 25 UI tests and 35 API tests, plus 13 API tests for bugs I found in the app, which stay disabled (more on that below). The UI covers what only the UI can show: error messages, disabled buttons, redirects and the purchase flow end to end. Business rules, permissions and contracts live in the API tests, which are faster and break less.
+There are 25 UI tests and 35 API tests, plus 13 API tests for bugs in the app, which stay disabled (more on that below). The UI covers what only the UI can show: error messages, disabled buttons, redirects and the purchase flow end to end. Business rules, permissions and contracts live in the API tests, which are faster and break less.
 
-**UI:** login (success, wrong password, unknown email, session after reload, logout, return to the page that asked for login), registration (success, email already in use, invalid email, short password, passwords that don't match), search, basket (including a visitor) and checkout (full order, and being blocked without an address or a card).
+**UI:** login (success, wrong password, unknown email, session after reload, logout, return to the page that asked for login), registration (success, email already in use, invalid email, short password, passwords that don't match), search, basket (including a visitor being sent to the login page at checkout) and checkout (full order, and being blocked without an address or a card).
 
 **Accessibility:** the shop, login, registration and basket pages are scanned with [axe](https://github.com/dequelabs/axe-core-npm/tree/develop/packages/playwright) against WCAG 2.1 AA. The problems the app already has (listed below) are skipped by rule, so the scenario fails when a new kind of problem shows up. When it fails, the full axe result is attached to the report.
 
@@ -61,9 +63,9 @@ I didn't use Gherkin for the API. REST Assured already reads as `given / when / 
 
 **Left out:** browsers other than Chromium, visual screenshot comparison (it breaks easily and the images change from one machine to another), checkout variations (coupons, wallet, other delivery options), load testing and in-depth security testing. At this suite size they weren't worth it.
 
-## Bugs I found
+## Bugs the suite exposes
 
-Juice Shop has bugs on purpose. The ones I found are in `KnownIssuesTest`. Each test is written with the correct behavior and is turned off with `@Disabled` and the reason, which is why Maven shows 13 skipped. If the app gets fixed, just turn them back on. The main ones:
+Juice Shop has bugs on purpose, and several of these are among its own listed challenges. I turned them into tests, in `KnownIssuesTest`. Each test is written with the correct behavior and is turned off with `@Disabled` and the reason, which is why Maven shows 13 skipped. If the app gets fixed, just turn them back on. The main ones:
 
 - a user can read another user's basket, change an item in it and check it out;
 - registration accepts an invalid email, no password, and passwords that don't match;
@@ -71,7 +73,7 @@ Juice Shop has bugs on purpose. The ones I found are in `KnownIssuesTest`. Each 
 - an address is saved with only a name;
 - broken JSON on login, an unknown product in the basket and order history without login all return 500.
 
-Accessibility problems found by axe, skipped in `accessibility.steps.ts`:
+Accessibility problems found by axe, skipped in `accessibility.steps.ts`. They are skipped by rule, so a new problem of one of these same kinds would not be caught:
 
 - the search field in the header has no label (`label`);
 - the quantity and remove buttons in the basket have no name (`button-name`);
@@ -81,7 +83,7 @@ Accessibility problems found by axe, skipped in `accessibility.steps.ts`:
 
 ## Pipeline
 
-- `smoke.yml`, on every push and pull request: lint (Biome, `tsc`, Spotless) and the UI and API smoke tests, with the app started from the Docker image.
+- `smoke.yml`, on every push to `main` and every pull request: lint (Biome, `tsc`, Spotless) and the UI and API smoke tests, with the app started from the Docker image.
 - `regression.yml`, Monday to Friday at night and whenever I trigger it by hand: the whole suite.
 
 Flaky tests: in the pipeline, a failing UI test gets one retry, only one. The failure trace is kept, and the UI and API reports are uploaded as artifacts even when the run fails. On the API side, the request and response are only logged when a check fails.
