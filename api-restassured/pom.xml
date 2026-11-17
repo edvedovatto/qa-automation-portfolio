@@ -11,6 +11,8 @@
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- known-issue tests run in a separate pass: mvn test -Dgroups=known-issue -DexcludedGroups= -->
+    <excludedGroups>known-issue</excludedGroups>
   </properties>
 
   <dependencies>

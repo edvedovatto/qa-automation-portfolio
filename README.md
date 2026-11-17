@@ -41,7 +41,7 @@ The order tests use up real stock. The app goes back to its initial state when i
 
 ## Strategy
 
-There are 25 UI tests and 35 API tests, plus 13 API tests for bugs in the app, which stay disabled (more on that below). The UI covers what only the UI can show: error messages, disabled buttons, redirects and the purchase flow end to end. Business rules, permissions and contracts live in the API tests, which are faster and break less.
+There are 25 UI tests and 35 API tests, plus 13 API tests for bugs in the app, which run in a separate pass (more on that below). The UI covers what only the UI can show: error messages, disabled buttons, redirects and the purchase flow end to end. Business rules, permissions and contracts live in the API tests, which are faster and break less.
 
 **UI:** login (success, wrong password, unknown email, session after reload, logout, return to the page that asked for login), registration (success, email already in use, invalid email, short password, passwords that don't match), search, basket (including a visitor being sent to the login page at checkout) and checkout (full order, and being blocked without an address or a card).
 
@@ -65,7 +65,7 @@ I didn't use Gherkin for the API. REST Assured already reads as `given / when / 
 
 ## Bugs the suite exposes
 
-Juice Shop has bugs on purpose, and several of these are among its own listed challenges. I turned them into tests, in `KnownIssuesTest`. Each test is written with the correct behavior and is turned off with `@Disabled` and the reason, which is why Maven shows 13 skipped. If the app gets fixed, just turn them back on. The main ones:
+Juice Shop has bugs on purpose, and several of these are among its own listed challenges. I turned them into tests, in `KnownIssuesTest`. Each test is written with the correct behavior and tagged `known-issue`, with the bug noted above it. `mvn test` leaves them out; `mvn test -Dgroups=known-issue -DexcludedGroups=` runs only them. In the pipeline they run in a separate pass after the regression: it doesn't fail the build, and it raises a warning if one of them starts passing, which means the bug was fixed. The main ones:
 
 - a user can read another user's basket, change an item in it and check it out;
 - registration accepts an invalid email, no password, and passwords that don't match;
@@ -84,7 +84,7 @@ Accessibility problems found by axe, skipped in `accessibility.steps.ts`. They a
 ## Pipeline
 
 - `smoke.yml`, on every push to `main` and every pull request: lint (Biome, `tsc`, Spotless) and the UI and API smoke tests, with the app started from the Docker image.
-- `regression.yml`, Monday to Friday at night and whenever I trigger it by hand: the whole suite.
+- `regression.yml`, Monday to Friday at night and whenever I trigger it by hand: the whole suite, then the known-issue tests in a separate pass that only warns.
 
 Flaky tests: in the pipeline, a failing UI test gets one retry, only one. The failure trace is kept, and the UI and API reports are uploaded as artifacts even when the run fails. On the API side, the request and response are only logged when a check fails.
 
