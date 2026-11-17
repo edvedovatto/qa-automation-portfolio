@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export class LoginPage {
   readonly emailInput: Locator;
@@ -15,6 +15,7 @@ export class LoginPage {
 
   async goto(redirectUrl?: string) {
     await this.page.goto(redirectUrl ? `/#/login?redirectUrl=${redirectUrl}` : '/#/login');
+    await expect(this.emailInput).toBeVisible();
   }
 
   async login(email: string, password: string) {

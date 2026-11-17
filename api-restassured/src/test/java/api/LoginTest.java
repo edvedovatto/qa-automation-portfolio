@@ -47,7 +47,7 @@ class LoginTest extends BaseTest {
 
     @Test
     void unknownEmailReturns401() {
-        shop.login(new Credentials("wrong@gmail.com", "wrongpassword"))
+        shop.login(new Credentials("wrong@example.com", "wrongpassword"))
                 .then()
                 .statusCode(401)
                 .body(equalTo("Invalid email or password."));

@@ -13,8 +13,6 @@ const knownProblems = [
 ];
 
 Then('the page has no new accessibility problems', async ({ page, $testInfo }) => {
-  await page.waitForLoadState('networkidle');
-
   const { violations } = await new AxeBuilder({ page }).withTags(wcag).disableRules(knownProblems).analyze();
 
   if (violations.length > 0) {
