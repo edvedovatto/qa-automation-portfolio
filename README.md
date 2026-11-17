@@ -82,7 +82,7 @@ I didn't use Gherkin for the API. REST Assured already reads as `given / when / 
 - 404 for a product that doesn't exist;
 - one user trying to read or delete another user's data.
 
-**Test data:** every test creates its own user through the API, with a unique email. The checkout address and card are created through the API too. The UI only does the part being tested.
+**Test data:** tests that change data create their own user through the API, with a unique email. The checkout address and card are created through the API too. The UI only does the part being tested.
 
 **Smoke and regression:** smoke is 7 tagged tests (`@smoke` in the UI, `@Tag("smoke")` in the API): login, search, basket, product list and one order. Regression is the whole suite.
 
