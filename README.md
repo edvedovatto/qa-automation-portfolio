@@ -111,9 +111,10 @@ Accessibility problems found by axe, skipped in `accessibility.steps.ts`. They a
 - `smoke.yml`, on every push to `main` and every pull request: lint (Biome, `tsc`, Spotless) and the UI and API smoke tests, with the app started from the Docker image.
 - `regression.yml`, Monday to Friday at night and whenever I trigger it by hand: the whole suite, then the known-issue tests in a separate pass that only warns.
 
+The Playwright report from the latest regression on `main` is published to GitHub Pages: [latest test report](https://edvedovatto.github.io/qa-automation-portfolio/).
+
 Flaky tests: in the pipeline, a failing UI test gets one retry, only one. The failure trace is kept, and the UI and API reports are uploaded as artifacts even when the run fails. On the API side, the request and response are only logged when a check fails.
 
 ## What I'd do next
 
-- Publish the Playwright report to GitHub Pages.
 - Add schemas for the error responses, not only the successful ones.
