@@ -72,6 +72,35 @@ jobs:
         run: |
           echo "### API regression" >> "$GITHUB_STEP_SUMMARY"
           grep -h "Tests run" api-restassured/target/surefire-reports/*.txt >> "$GITHUB_STEP_SUMMARY" || true
+      - name: known issues
+        if: always()
+        continue-on-error: true
+        working-directory: api-restassured
+        run: |
+          mvn -B test -Dgroups=known-issue -DexcludedGroups= -Dmaven.test.failure.ignore=true
+          python3 - <<'EOF'
+          import os
+          import xml.etree.ElementTree as ET
+
+          report = "target/surefire-reports/TEST-api.KnownIssuesTest.xml"
+          if not os.path.exists(report):
+              print("::warning title=Known issues::The known-issue pass did not produce a report")
+              raise SystemExit
+          fixed, broken, still_open = [], [], 0
+          for case in ET.parse(report).getroot().iter("testcase"):
+              if case.find("error") is not None:
+                  broken.append(case.get("name"))
+              elif case.find("failure") is not None:
+                  still_open += 1
+              elif case.find("skipped") is None:
+                  fixed.append(case.get("name"))
+          for name in fixed:
+              print(f"::warning title=Known issue fixed::{name} passes now, move it out of KnownIssuesTest")
+          for name in broken:
+              print(f"::warning title=Known issue errored::{name} did not run to the end, check the report")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write(f"### Known issues\n{still_open} still open, {len(fixed)} fixed, {len(broken)} errored\n")
+          EOF
       - uses: actions/upload-artifact@v7
         if: always()
         with:
