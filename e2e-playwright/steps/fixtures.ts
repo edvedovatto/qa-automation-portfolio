@@ -26,7 +26,7 @@ export const test = base.extend<{
   header: HeaderComponent;
 }>({
   user: async ({ request }, use, testInfo) => {
-    const email = `user${testInfo.parallelIndex}${Date.now()}@gmail.com`;
+    const email = `user${testInfo.parallelIndex}${Date.now()}@example.com`;
 
     const response = await request.post('/api/Users', {
       data: { email, password, passwordRepeat: password },
@@ -37,7 +37,7 @@ export const test = base.extend<{
   },
 
   newEmail: async ({}, use, testInfo) => {
-    await use(`newuser${testInfo.parallelIndex}${Date.now()}@gmail.com`);
+    await use(`newuser${testInfo.parallelIndex}${Date.now()}@example.com`);
   },
 
   session: async ({ request, user }, use) => {

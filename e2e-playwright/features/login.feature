@@ -19,7 +19,7 @@ Feature: Login
 
   Scenario: Unknown email gets the same error as a wrong password
     Given I am on the login page
-    When I log in as "wrong@gmail.com" with the password "wrongpassword"
+    When I log in as "wrong@example.com" with the password "wrongpassword"
     Then I see the login error "Invalid email or password."
     And I stay on the login page
 

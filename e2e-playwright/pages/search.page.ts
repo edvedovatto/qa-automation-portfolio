@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export class SearchPage {
   readonly openSearchButton: Locator;
@@ -13,6 +13,7 @@ export class SearchPage {
 
   async goto() {
     await this.page.goto('/#/search');
+    await expect(this.page.locator('app-product').first()).toBeVisible();
   }
 
   async search(term: string) {
@@ -34,5 +35,11 @@ export class SearchPage {
     );
     await this.product(name).getByRole('button', { name: 'Add to Basket' }).click();
     await saved;
+  }
+
+  async addToBasketAsVisitor(name: string, basketCount: Locator) {
+    const before = Number((await basketCount.textContent({ timeout: 1000 }).catch(() => null)) ?? 0);
+    await this.product(name).getByRole('button', { name: 'Add to Basket' }).click();
+    await expect(basketCount).toHaveText(String(before + 1));
   }
 }

@@ -31,7 +31,7 @@ abstract class BaseTest {
     }
 
     protected Credentials randomCredentials() {
-        return new Credentials("user" + System.nanoTime() + "@gmail.com", "Password123");
+        return new Credentials("user" + System.nanoTime() + "@example.com", "Password123");
     }
 
     protected Credentials newUser() {

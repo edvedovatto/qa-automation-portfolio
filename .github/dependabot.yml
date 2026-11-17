@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /e2e-playwright
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: maven
+    directory: /api-restassured
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

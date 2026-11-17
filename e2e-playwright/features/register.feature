@@ -24,5 +24,5 @@ Feature: Registration
     Examples:
       | problem                   | email          | password    | repeated    | error                                  |
       | the email is invalid      | notanemail     | Password123 | Password123 | Email address is not valid.            |
-      | the password is too short | user@gmail.com | abc         | abc         | Password must be 5-40 characters long. |
-      | the passwords differ      | user@gmail.com | Password123 | Other123    | Passwords do not match                 |
+      | the password is too short | user@example.com | abc         | abc         | Password must be 5-40 characters long. |
+      | the passwords differ      | user@example.com | Password123 | Other123    | Passwords do not match                 |

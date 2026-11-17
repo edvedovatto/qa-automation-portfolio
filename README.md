@@ -9,10 +9,16 @@ What I wanted to show here: how I split what belongs in the UI and what belongs 
 
 ## Running it
 
-You need Node 22+ (the pipeline uses 24), Java 17 and Maven. The app can run in Docker:
+You need Node 22+ (the pipeline uses 24), Java 17 and Maven. With Docker and `make`, one command starts the app and runs both suites:
 
 ```
-docker run --rm -d -p 3000:3000 bkimminich/juice-shop:v20.3.0
+make test
+```
+
+`make stop` shuts the app down. Step by step, the app can run in Docker:
+
+```
+docker compose up -d
 ```
 
 Without Docker, clone [juice-shop](https://github.com/juice-shop/juice-shop) at v20.3.0, run `npm install` and `npm start` there, and it listens on the same port.
@@ -38,6 +44,25 @@ mvn test -Dgroups=smoke
 If the app runs somewhere else, set `BASE_URL=http://host:port` (Maven also takes `-DbaseUrl=...`). Lint and formatting: `npm run lint`, `npm run typecheck` and `mvn spotless:check`.
 
 The order tests use up real stock. The app goes back to its initial state when it restarts, so if you run the suite many times in a row, restart the app now and then. The pipeline doesn't have this problem because every run starts a fresh container.
+
+## What is in here
+
+```
+.
+├── api-restassured/         API tests: REST Assured, JUnit 5, Java 17
+│   └── src/test
+│       ├── java/api         one test class per area, plus the client and the models
+│       └── resources/schemas  JSON schemas for the main responses
+├── e2e-playwright/          UI tests: Playwright, TypeScript
+│   ├── features             Gherkin scenarios
+│   ├── pages                page objects
+│   └── steps                step definitions and fixtures
+├── .github/workflows        smoke and regression pipelines
+├── docker-compose.yml       Juice Shop v20.3.0 on port 3000
+└── Makefile
+```
+
+Most UI locators use roles and labels. A few use CSS (`app-product`, `#searchQuery input`, `.warn-notification`, `mat-error`) because those parts of the Angular Material UI have no role or accessible name to hold on to.
 
 ## Strategy
 
